@@ -215,6 +215,12 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
         return;
     }
 
+    const dataAuth = document.getElementById('data-auth');
+    if (!dataAuth.checked) {
+        alert('Por favor, autoriza el tratamiento de tus datos personales para continuar.');
+        return;
+    }
+
     // Google Sheets Submission
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4Kx04ibw6Jq33CgC94du4JFSJH7TRSugH2OL_5c7UePMRwh9toyqK8Dy1AbgAUQgEZA/exec";
 
@@ -259,6 +265,7 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
                 document.getElementById('client-name').value = "";
                 document.getElementById('client-phone').value = "";
                 document.getElementById('client-address').value = "";
+                document.getElementById('data-auth').checked = false;
             } else {
                 throw new Error("Error en la respuesta del servidor");
             }

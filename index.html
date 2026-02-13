@@ -13,6 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 
 <body>
@@ -137,6 +140,52 @@
         </div>
     </section>
 
+    <!-- Coverage Section -->
+    <section class="section coverage" id="coverage">
+        <div class="container">
+            <div class="section-header">
+                <h2>🐾 Llegamos hasta donde mueve la cola</h2>
+                <p>En Bites4PET queremos que tu peludo reciba su comida fresca sin preocupaciones.</p>
+            </div>
+
+            <div class="coverage-content">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <button id="reset-map-btn" class="map-reset-btn"><i class="fa-solid fa-location-crosshairs"></i>
+                        Centrar Mapa</button>
+                </div>
+
+                <div class="coverage-info animate-on-scroll slide-right">
+                    <p class="coverage-intro">Ofrecemos domicilio sin costo dentro de nuestra zona principal de
+                        cobertura en Bogotá, calculada desde nuestro punto base.
+                    </p>
+
+                    <div class="address-check-container">
+                        <label for="user-address">Consulta si tu dirección está en zona gratuita:</label>
+                        <div class="address-check">
+                            <input type="text" id="user-address"
+                                placeholder="Ingresa tu dirección (Ej: Calle 160 # 73-10)" class="address-input">
+                            <button id="check-address-btn" class="btn btn-primary">Consultar mi dirección</button>
+                        </div>
+                        <div id="coverage-result" class="coverage-result"></div>
+                    </div>
+
+                    <p class="small-text">Si tu dirección está fuera de este perímetro, podremos llevar tu pedido con un
+                        recargo adicional que puede variar según distancia, condiciones climáticas y horario. Nuestro
+                        equipo siempre confirmará la información antes de despachar tu orden.</p>
+
+                    <div class="base-location">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+
+                    <div class="slogan-container">
+                        <span class="coverage-slogan">🐶 Barriga llena, cola feliz.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Testimonials / Emotional -->
     <section class="section emotional">
         <div class="container">
@@ -250,11 +299,11 @@
                 </div>
                 <div class="form-group">
                     <label for="client-phone">Celular</label>
-                    <input type="tel" id="client-phone" placeholder="300 667 4990" required>
+                    <input type="tel" id="client-phone" placeholder="3000000000" required>
                 </div>
                 <div class="form-group">
                     <label for="client-address">Dirección</label>
-                    <input type="text" id="client-address" placeholder="Calle 123 # 45-67" required>
+                    <input type="text" id="client-address" placeholder="Calle .. # 1-1" required>
                 </div>
                 <div class="form-group checkbox-group"
                     style="display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;">
@@ -271,6 +320,9 @@
         </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="script.js"></script>
 </body>
 

@@ -303,4 +303,202 @@ function observeElements() {
 }
 
 // Initial observation for static elements
+// Initial observation for static elements
 observeElements();
+
+// --- Coverage Map Logic ---
+let map;
+let coveragePolygon;
+const baseLat = 4.745;
+const baseLng = -74.060;
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+});
+
+function initMap() {
+    // Initialize Map
+    map = L.map('map').setView([baseLat, baseLng], 14);
+
+    // Tile Layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Custom Icon (Paw)
+    const pawIcon = L.divIcon({
+        className: 'custom-paw-icon',
+        html: '<div style="font-size: 24px; color: #F47A20; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);"><i class="fa-solid fa-paw"></i></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+
+    // Marker at Base (Generic Popup)
+    L.marker([baseLat, baseLng], { icon: pawIcon }).addTo(map)
+        .bindPopup("<b>Bites 4 Pet</b><br>Centro de Distribución")
+        .openPopup();
+
+    // Coverage Rectangle
+    // Increased to ~30 blocks N/S (~3km). 
+    // 1 deg lat ~= 110km. 3km ~= 0.027 deg.
+    const latDelta = 0.027;
+    const lngDelta = 0.027;
+
+    const bounds = [
+        [baseLat - latDelta, baseLng - lngDelta], // South-West
+        [baseLat + latDelta, baseLng + lngDelta]  // North-East
+    ];
+
+    coveragePolygon = L.rectangle(bounds, {
+        color: "#7A9B5D",       // Stronger green border
+        weight: 3,
+        fillColor: "#7A9B5D",   // Soft green interior
+        fillOpacity: 0.2
+    }).addTo(map);
+
+    // Fit map to bounds initially
+    map.fitBounds(bounds);
+
+    // Map Reset Logic
+    const resetBtn = document.getElementById('reset-map-btn');
+
+    if (resetBtn) {
+        // Show button when map moves away from center
+        map.on('moveend', () => {
+            const center = map.getCenter();
+            const dist = map.distance(center, [baseLat, baseLng]);
+            // If distance > 500 meters, show button
+            if (dist > 500) {
+                resetBtn.classList.add('visible');
+            } else {
+                resetBtn.classList.remove('visible');
+            }
+        });
+
+        // Reset functionality
+        resetBtn.addEventListener('click', () => {
+            map.flyTo([baseLat, baseLng], 14); // Return to base zoom
+            resetBtn.classList.remove('visible');
+        });
+    }
+
+    // Address Check Logic
+    const addressInput = document.getElementById('user-address');
+    const checkBtn = document.getElementById('check-address-btn');
+    const resultContainer = document.getElementById('coverage-result');
+
+    checkBtn.addEventListener('click', () => {
+        const address = addressInput.value.trim();
+        if (!address) return;
+
+        checkBtn.disabled = true;
+        checkBtn.textContent = 'Verificando...';
+        resultContainer.className = 'coverage-result';
+        resultContainer.textContent = '';
+
+        checkAddressCoverage(address, (isInside, lat, lon, error) => {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Consultar mi dirección';
+
+            if (error) {
+                resultContainer.textContent = error;
+                resultContainer.classList.add('warning');
+                return;
+            }
+
+            if (isInside) {
+                resultContainer.textContent = "Tu domicilio es GRATIS 🎉";
+                resultContainer.classList.add('success');
+            } else {
+                resultContainer.textContent = "Tu zona tiene recargo adicional. Te confirmaremos el valor antes del envío.";
+                resultContainer.classList.add('warning');
+            }
+
+            // Fly to location
+            if (lat && lon) {
+                map.flyTo([lat, lon], 14);
+            }
+        });
+    });
+}
+
+// Reusable Coverage Check Function
+function checkAddressCoverage(address, callback) {
+    // Use Nominatim API for geocoding
+    // We limit to Colombia to avoid ambiguity
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ", Bogota, Colombia")}&limit=1`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                // Simple bounds check since we know the rectangle props
+                // 1 deg lat ~= 110km. 3km ~= 0.027 deg.
+                const latDelta = 0.027;
+                const lngDelta = 0.027;
+                const south = baseLat - latDelta;
+                const north = baseLat + latDelta;
+                const west = baseLng - lngDelta;
+                const east = baseLng + lngDelta;
+
+                const isInside = (lat >= south && lat <= north && lon >= west && lon <= east);
+
+                callback(isInside, lat, lon, null);
+
+            } else {
+                callback(false, null, null, "No pudimos encontrar esa dirección. Intenta ser más específico.");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            callback(false, null, null, "Error al consultar. Intenta de nuevo.");
+        });
+}
+
+// Cart Coverage Check Logic
+function initCartCoverageCheck() {
+    const cartAddressInput = document.getElementById('client-address');
+    if (!cartAddressInput) return;
+
+    // Create a warning message element for the cart
+    const warningMsg = document.createElement('div');
+    warningMsg.id = 'cart-coverage-warning';
+    warningMsg.style.fontSize = '0.85rem';
+    warningMsg.style.marginTop = '5px';
+    warningMsg.style.fontWeight = '600';
+    warningMsg.style.display = 'none';
+
+    // Insert after the input
+    cartAddressInput.parentNode.insertBefore(warningMsg, cartAddressInput.nextSibling);
+
+    cartAddressInput.addEventListener('blur', () => {
+        const address = cartAddressInput.value.trim();
+        if (address.length < 5) {
+            warningMsg.style.display = 'none';
+            return;
+        }
+
+        warningMsg.style.display = 'block';
+        warningMsg.textContent = 'Verificando cobertura...';
+        warningMsg.style.color = 'var(--color-text-light)';
+
+        checkAddressCoverage(address, (isInside, lat, lon, error) => {
+            if (error) {
+                warningMsg.textContent = "📍 " + error;
+                warningMsg.style.color = 'var(--color-primary-dark)'; // Warning color
+                return;
+            }
+
+            if (isInside) {
+                warningMsg.textContent = "🎉 Domicilio Gratis en tu zona.";
+                warningMsg.style.color = 'var(--color-accent)'; // Green
+            } else {
+                warningMsg.textContent = "⚠️ Zona con recargo adicional. Te confirmaremos el valor.";
+                warningMsg.style.color = 'var(--color-primary-dark)'; // Warning color
+            }
+        });
+    });
+}
+

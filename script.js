@@ -363,6 +363,13 @@ function generateOrderPDF(orderData) {
     doc.text("Gracias por tu compra. ¡Tu peludo te lo agradecerá!", 105, finalY + 30, { align: "center" });
     doc.text("Contacto: +57 300 667 4990", 105, finalY + 36, { align: "center" });
 
+    // Disclaimer
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    const disclaimer = "Ten presente que en caso de que tu ubicación supere el perímetro de cobertura, el domicilio tendrá un recargo. Uno de nuestros colaboradores se comunicará contigo para confirmar la información del pedido realizado.";
+    const splitDisclaimer = doc.splitTextToSize(disclaimer, 180);
+    doc.text(splitDisclaimer, 105, finalY + 45, { align: "center" });
+
     // Save PDF
     doc.save(`Pedido_${orderData.name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
 }

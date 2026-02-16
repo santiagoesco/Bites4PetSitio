@@ -426,7 +426,10 @@ function initMap() {
 function checkAddressCoverage(address, callback) {
     // Use Nominatim API for geocoding
     // We limit to Colombia to avoid ambiguity
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ", Bogota, Colombia")}&limit=1`;
+    // Restrict to Bogota bounds: West, North, East, South
+    // Approx Bounds: -74.25, 4.84, -73.90, 4.45
+    const viewbox = "-74.25,4.84,-73.90,4.45";
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ", Bogota, Colombia")}&limit=1&viewbox=${viewbox}&bounded=1`;
 
     fetch(url)
         .then(response => response.json())

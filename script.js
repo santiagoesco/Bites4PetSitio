@@ -244,6 +244,15 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
 
     const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+    // Capture order data for PDF before potential cart clearing
+    const orderDataForPDF = {
+        name,
+        phone,
+        address,
+        cart: JSON.parse(JSON.stringify(cart)), // Deep clone to be safe
+        totalPrice
+    };
+
     const formData = new FormData();
     formData.append("Cliente", name);
     formData.append("Telefono", phone);
@@ -277,8 +286,86 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
         .finally(() => {
             submitBtn.innerText = originalText;
             submitBtn.disabled = false;
+
+            // Generate PDF
+            try {
+                generateOrderPDF(orderDataForPDF);
+                console.log("PDF generated successfully.");
+            } catch (pdfError) {
+                console.error("Error generating PDF:", pdfError);
+                alert("El pedido se envió, pero hubo un error generando el PDF.");
+            }
         });
 });
+
+// PDF Generation
+function generateOrderPDF(orderData) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Logo
+    if (typeof logoBase64 !== 'undefined') {
+        doc.addImage(logoBase64, 'JPEG', 10, 10, 50, 20);
+    } else {
+        const logoImg = document.querySelector('.logo-img');
+        if (logoImg) {
+            doc.addImage(logoImg, 'JPEG', 10, 10, 50, 20);
+        }
+    }
+
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(244, 122, 32); // Orange #F47A20
+    doc.text("Bites 4 Pet", 105, 25, { align: "center" });
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Resumen de Pedido", 105, 30, { align: "center" });
+
+    // Customer Details
+    doc.setFontSize(10);
+    doc.text(`Fecha: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 14, 45);
+    doc.text(`Cliente: ${orderData.name}`, 14, 52);
+    doc.text(`Teléfono: ${orderData.phone}`, 14, 59);
+    doc.text(`Dirección: ${orderData.address}`, 14, 66);
+
+    // Order Table
+    const tableColumn = ["Producto", "Cant.", "Precio Unit.", "Subtotal"];
+    const tableRows = [];
+
+    orderData.cart.forEach(item => {
+        const productData = [
+            item.name,
+            item.quantity,
+            `$${item.price.toLocaleString()}`,
+            `$${(item.price * item.quantity).toLocaleString()}`
+        ];
+        tableRows.push(productData);
+    });
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 75,
+        theme: 'striped',
+        headStyles: { fillColor: [244, 122, 32] }, // Orange #F47A20
+        margin: { top: 75 },
+    });
+
+    // Total
+    const finalY = doc.lastAutoTable.finalY || 75;
+    doc.setFontSize(14);
+    doc.text(`Total: $${orderData.totalPrice.toLocaleString()}`, 196, finalY + 15, { align: "right" });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Gracias por tu compra. ¡Tu peludo te lo agradecerá!", 105, finalY + 30, { align: "center" });
+    doc.text("Contacto: +57 300 667 4990", 105, finalY + 36, { align: "center" });
+
+    // Save PDF
+    doc.save(`Pedido_${orderData.name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+}
 
 // Scroll Animations
 // Scroll Animations (Refactored for dynamic content)

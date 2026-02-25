@@ -582,6 +582,7 @@ function calcularNutricion(peso, factorActividad, factorContextura) {
 }
 
 function initCalculadora() {
+    const inputNombre = document.getElementById('nombre-perro');
     const inputPeso = document.getElementById('peso-perro');
     const selectActividad = document.getElementById('nivel-actividad');
     const selectContextura = document.getElementById('contextura');
@@ -589,10 +590,13 @@ function initCalculadora() {
     const resultContainer = document.getElementById('calculator-result');
     const btnComprar = document.getElementById('btn-comprar');
     const sobrepesoAlert = document.getElementById('sobrepeso-alert');
+    const resultTitle = document.getElementById('result-title');
+    const resultTagline = document.getElementById('result-tagline');
 
     if (!inputPeso || !btnCalcular || !selectActividad || !selectContextura) return;
 
     btnCalcular.addEventListener('click', () => {
+        const nombre = (inputNombre ? inputNombre.value.trim() : '') || '';
         const peso = parseFloat(inputPeso.value);
         const factorActividad = parseFloat(selectActividad.value);
         const factorContextura = parseFloat(selectContextura.value);
@@ -608,6 +612,18 @@ function initCalculadora() {
 
         const resultado = calcularNutricion(peso, factorActividad, factorContextura);
 
+        // Personalizar título y mensaje con el nombre
+        if (resultTitle) {
+            resultTitle.textContent = nombre
+                ? `🐶 Plan nutricional para ${nombre}`
+                : 'Recomendación para tu peludo';
+        }
+        if (resultTagline) {
+            resultTagline.innerHTML = nombre
+                ? `Con <strong>Bites 4 Pet</strong>, <strong>${nombre}</strong> recibe nutrición real basada en ciencia.`
+                : 'Nutrición real basada en ciencia.';
+        }
+
         document.getElementById('kcal-diarias').textContent = resultado.mer + ' kcal';
         document.getElementById('gramos-diarios').textContent = resultado.gramosDiarios + ' g';
         document.getElementById('gramos-mensuales').textContent = resultado.gramosMensuales.toLocaleString('es-CO') + ' g';
@@ -622,7 +638,8 @@ function initCalculadora() {
         if (btnComprar) {
             const actividadText = selectActividad.options[selectActividad.selectedIndex].text.trim();
             const contexturaText = selectContextura.options[selectContextura.selectedIndex].text.trim();
-            const msg = `Hola! Quiero comprar ${resultado.porciones} porciones de 500g de Bites 4 Pet para mi perro de ${peso}kg (actividad: ${actividadText}, contextura: ${contexturaText}).`;
+            const nombreMsg = nombre ? ` para ${nombre}` : ' para mi perro';
+            const msg = `Hola! Quiero comprar ${resultado.porciones} porciones de 500g de Bites 4 Pet${nombreMsg} de ${peso}kg (actividad: ${actividadText}, contextura: ${contexturaText}).`;
             btnComprar.href = `https://wa.me/573006674990?text=${encodeURIComponent(msg)}`;
         }
 

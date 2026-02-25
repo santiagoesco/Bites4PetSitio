@@ -1243,7 +1243,7 @@ h4 {
 
 .calculator-fields {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
     text-align: left;
@@ -1297,6 +1297,11 @@ h4 {
     gap: 0;
     max-width: 100%;
     margin: 0 0 0.5rem;
+}
+
+.calculator-input-full {
+    border-radius: 12px;
+    border-right: 2px solid var(--color-light-grey);
 }
 
 .calculator-input {

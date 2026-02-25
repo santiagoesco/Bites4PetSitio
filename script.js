@@ -404,7 +404,7 @@ observeElements();
 let map;
 let coveragePolygon;
 const baseLat = 4.745;
-const baseLng = -74.060;
+const baseLng = -74.075; // Centrado entre Cra 7 y Cra 78
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initMap() {
     // Initialize Map
-    map = L.map('map').setView([baseLat, baseLng], 14);
+    map = L.map('map').setView([baseLat, baseLng], 13);
 
     // Tile Layer (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -433,14 +433,15 @@ function initMap() {
         .openPopup();
 
     // Coverage Rectangle
-    // Increased to ~30 blocks N/S (~3km). 
-    // 1 deg lat ~= 110km. 3km ~= 0.027 deg.
+    // Latitud: mantener delta actual (~3km norte-sur)
     const latDelta = 0.027;
-    const lngDelta = 0.027;
+    // Longitud: Carrera 7 ≈ -74.030 (este) | Carrera 78 ≈ -74.120 (oeste)
+    const lngEste = -74.030;  // Carrera 7
+    const lngOeste = -74.120; // Carrera 78
 
     const bounds = [
-        [baseLat - latDelta, baseLng - lngDelta], // South-West
-        [baseLat + latDelta, baseLng + lngDelta]  // North-East
+        [baseLat - latDelta, lngOeste], // South-West (Cra 78)
+        [baseLat + latDelta, lngEste]   // North-East (Cra 7)
     ];
 
     coveragePolygon = L.rectangle(bounds, {
@@ -531,14 +532,13 @@ function checkAddressCoverage(address, callback) {
             if (data && data.length > 0) {
                 const lat = parseFloat(data[0].lat);
                 const lon = parseFloat(data[0].lon);
-                // Simple bounds check since we know the rectangle props
-                // 1 deg lat ~= 110km. 3km ~= 0.027 deg.
+                // Simple bounds check matching the coverage rectangle
+                // Latitud: baseLat ± 0.027 | Longitud: Cra 78 a Cra 7
                 const latDelta = 0.027;
-                const lngDelta = 0.027;
                 const south = baseLat - latDelta;
                 const north = baseLat + latDelta;
-                const west = baseLng - lngDelta;
-                const east = baseLng + lngDelta;
+                const west = -74.120;  // Carrera 78
+                const east = -74.030;  // Carrera 7
 
                 const isInside = (lat >= south && lat <= north && lon >= west && lon <= east);
 
@@ -553,6 +553,92 @@ function checkAddressCoverage(address, callback) {
             callback(false, null, null, "Error al consultar. Intenta de nuevo.");
         });
 }
+
+// =====================
+// CALCULADORA NUTRICIONAL PRO (RER + MER + Contextura)
+// =====================
+const KCAL_POR_GRAMO = 2.16; // 216 kcal / 100g de Bites 4 Pet
+
+function calcularNutricion(peso, factorActividad, factorContextura) {
+    // Paso 1: RER
+    const rer = 70 * Math.pow(peso, 0.75);
+    // Paso 2: MER
+    let mer = rer * factorActividad;
+    // Paso 3: Ajuste por contextura corporal
+    mer = mer * factorContextura;
+    // Paso 4: Convertir a gramos
+    const gramosExactos = mer / KCAL_POR_GRAMO;
+    // Paso 5: Redondeo estratégico al múltiplo de 50 más cercano hacia arriba
+    const gramosDiarios = Math.ceil(gramosExactos / 50) * 50;
+    const gramosMensuales = gramosDiarios * 30;
+    const porciones = Math.ceil(gramosMensuales / 500);
+    return {
+        rer: Math.round(rer),
+        mer: Math.round(mer),
+        gramosDiarios,
+        gramosMensuales,
+        porciones
+    };
+}
+
+function initCalculadora() {
+    const inputPeso = document.getElementById('peso-perro');
+    const selectActividad = document.getElementById('nivel-actividad');
+    const selectContextura = document.getElementById('contextura');
+    const btnCalcular = document.getElementById('btn-calcular');
+    const resultContainer = document.getElementById('calculator-result');
+    const btnComprar = document.getElementById('btn-comprar');
+    const sobrepesoAlert = document.getElementById('sobrepeso-alert');
+
+    if (!inputPeso || !btnCalcular || !selectActividad || !selectContextura) return;
+
+    btnCalcular.addEventListener('click', () => {
+        const peso = parseFloat(inputPeso.value);
+        const factorActividad = parseFloat(selectActividad.value);
+        const factorContextura = parseFloat(selectContextura.value);
+
+        // Validación
+        inputPeso.classList.remove('error');
+        if (!peso || peso < 2 || peso > 40) {
+            inputPeso.classList.add('error');
+            resultContainer.classList.remove('visible');
+            setTimeout(() => inputPeso.classList.remove('error'), 600);
+            return;
+        }
+
+        const resultado = calcularNutricion(peso, factorActividad, factorContextura);
+
+        document.getElementById('kcal-diarias').textContent = resultado.mer + ' kcal';
+        document.getElementById('gramos-diarios').textContent = resultado.gramosDiarios + ' g';
+        document.getElementById('gramos-mensuales').textContent = resultado.gramosMensuales.toLocaleString('es-CO') + ' g';
+        document.getElementById('porciones-mes').textContent = resultado.porciones;
+
+        // Mostrar/ocultar alerta de sobrepeso
+        if (sobrepesoAlert) {
+            sobrepesoAlert.classList.toggle('visible', factorContextura === 0.85);
+        }
+
+        // Actualizar botón comprar con la cantidad
+        if (btnComprar) {
+            const actividadText = selectActividad.options[selectActividad.selectedIndex].text.trim();
+            const contexturaText = selectContextura.options[selectContextura.selectedIndex].text.trim();
+            const msg = `Hola! Quiero comprar ${resultado.porciones} porciones de 500g de Bites 4 Pet para mi perro de ${peso}kg (actividad: ${actividadText}, contextura: ${contexturaText}).`;
+            btnComprar.href = `https://wa.me/573006674990?text=${encodeURIComponent(msg)}`;
+        }
+
+        resultContainer.classList.add('visible');
+    });
+
+    // Permitir calcular con Enter
+    inputPeso.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            btnCalcular.click();
+        }
+    });
+}
+
+// Inicializar calculadora al cargar
+document.addEventListener('DOMContentLoaded', initCalculadora);
 
 // Cart Coverage Check Logic
 function initCartCoverageCheck() {

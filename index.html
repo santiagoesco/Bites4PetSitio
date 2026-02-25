@@ -36,6 +36,7 @@
                     <li><a href="#hero">Inicio</a></li>
                     <li><a href="#benefits">Filosofía</a></li>
                     <li><a href="#products">Tienda</a></li>
+                    <li><a href="#calculadora">Calculadora</a></li>
                     <li><a href="#contact">Contacto</a></li>
                 </ul>
             </nav>
@@ -192,6 +193,99 @@
             <blockquote class="quote animate-on-scroll zoom-in">
                 "No es solo una mascota, es parte de mi vida. Por eso elijo Bites 4 Pet."
             </blockquote>
+        </div>
+    </section>
+
+    <!-- Calculadora de Alimento -->
+    <section class="section calculator-section" id="calculadora">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="calculator-title">CALCULADORA NUTRICIONAL PRO</h2>
+                <p>Calcula la porción ideal de alimento Bites 4 Pet según el peso, actividad y contextura de tu perro.</p>
+            </div>
+
+            <div class="calculator-card">
+                <div class="calculator-form">
+                    <div class="calculator-fields">
+                        <div class="calculator-field">
+                            <label for="peso-perro" class="calculator-label">
+                                <i class="fa-solid fa-dog"></i> ¿Cuánto pesa tu perro?
+                            </label>
+                            <div class="calculator-input-group">
+                                <input type="number" id="peso-perro" class="calculator-input" placeholder="Ej: 12" min="2" max="40" step="0.5">
+                                <span class="calculator-unit">kg</span>
+                            </div>
+                            <p class="calculator-hint">Ingresa un peso entre 2 kg y 40 kg</p>
+                        </div>
+                        <div class="calculator-field">
+                            <label for="nivel-actividad" class="calculator-label">
+                                <i class="fa-solid fa-fire"></i> Nivel de actividad
+                            </label>
+                            <select id="nivel-actividad" class="calculator-select">
+                                <option value="1.4">🛋️ Bajo – Sedentario / Senior</option>
+                                <option value="1.6" selected>🐕 Normal – Paseos diarios</option>
+                                <option value="1.8">🏃 Activo – Juego intenso</option>
+                                <option value="2.0">⚡ Muy activo – Trabajo / Deporte</option>
+                            </select>
+                        </div>
+                        <div class="calculator-field">
+                            <label for="contextura" class="calculator-label">
+                                <i class="fa-solid fa-weight-scale"></i> Contextura corporal
+                            </label>
+                            <select id="contextura" class="calculator-select">
+                                <option value="1.10">🦴 Delgada – Necesita ganar peso</option>
+                                <option value="1.00" selected>✅ Ideal – Peso saludable</option>
+                                <option value="0.85">⚖️ Sobrepeso – Necesita bajar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="btn-calcular" class="btn btn-primary calculator-btn">
+                        <i class="fa-solid fa-calculator"></i> Calcular porción ideal
+                    </button>
+                </div>
+
+                <div id="calculator-result" class="calculator-result">
+                    <div class="result-header">
+                        <i class="fa-solid fa-bowl-food"></i>
+                        <h3>Recomendación para tu peludo</h3>
+                    </div>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-icon">🔥</span>
+                            <span class="result-value" id="kcal-diarias">—</span>
+                            <span class="result-label">kcal necesarias / día</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-icon">🥩</span>
+                            <span class="result-value" id="gramos-diarios">—</span>
+                            <span class="result-label">Gramos diarios</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-icon">📅</span>
+                            <span class="result-value" id="gramos-mensuales">—</span>
+                            <span class="result-label">Gramos al mes</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-icon">📦</span>
+                            <span class="result-value" id="porciones-mes">—</span>
+                            <span class="result-label">Porciones de 500g / mes</span>
+                        </div>
+                    </div>
+                    <div class="result-message">
+                        <p class="result-tagline">Nutrición real basada en ciencia.</p>
+                        <p class="result-slogan">Barriga llena, cola feliz 🐶</p>
+                    </div>
+                    <div id="sobrepeso-alert" class="sobrepeso-alert">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        <p>Recomendamos acompañar este plan con actividad diaria y seguimiento veterinario.</p>
+                    </div>
+                    <a href="https://wa.me/573006674990?text=Hola!%20Quiero%20comprar%20alimento%20Bites%204%20Pet" target="_blank" class="btn btn-primary calculator-buy-btn" id="btn-comprar">
+                        <i class="fa-brands fa-whatsapp"></i> Comprar ahora
+                    </a>
+                </div>
+
+                <p class="calculator-disclaimer">Recomendación general. Ajustar según condición corporal y orientación veterinaria.</p>
+            </div>
         </div>
     </section>
 

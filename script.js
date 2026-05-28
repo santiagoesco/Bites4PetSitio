@@ -1,6 +1,22 @@
 // Product Data (Mock)
 const products = [
     {
+        id: 10,
+        name: "Barriga Llena Pollo 500g",
+        price: 8000,
+        category: "Alimento Natural",
+        image: "MIX DESHIDRATADOS (1).png",
+        description: "Alimento natural de 500 g, elaborado con proteína de pollo para una nutrición completa y sabrosa."
+    },
+    {
+        id: 11,
+        name: "Barriga Llena Res 500g",
+        price: 8000,
+        category: "Alimento Natural",
+        image: "MIX DESHIDRATADOS (2).png",
+        description: "Alimento natural de 500 g, elaborado con proteína de res para aportar energía y bienestar diario."
+    },
+    {
         id: 1,
         name: "ROKETAS",
         price: 10000,

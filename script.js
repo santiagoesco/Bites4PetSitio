@@ -90,6 +90,8 @@ const products = [
     }
 ];
 
+const formatCOP = (value) => new Intl.NumberFormat('es-CO').format(value);
+
 // State
 let cart = [];
 
@@ -121,7 +123,7 @@ function renderProducts() {
                 <span class="product-category">${product.category}</span>
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
-                <span class="product-price">$${product.price.toLocaleString()}</span>
+                <span class="product-price">$${formatCOP(product.price)}</span>
                 <button class="btn btn-secondary btn-block" onclick="addToCart(${product.id})">
                     Agregar al Carrito
                 </button>
@@ -172,7 +174,7 @@ function updateCartUI() {
 
     cartCountElement.textContent = totalItems;
     cartTotalCountElement.textContent = `(${totalItems})`;
-    cartTotalPriceElement.textContent = `$${totalPrice.toLocaleString()}`;
+    cartTotalPriceElement.textContent = `$${formatCOP(totalPrice)}`;
 
     // Render Items
     if (cart.length === 0) {
@@ -183,7 +185,7 @@ function updateCartUI() {
                 <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-details">
                     <div class="cart-item-title">${item.name}</div>
-                    <div class="cart-item-price">$${item.price.toLocaleString()}</div>
+                    <div class="cart-item-price">$${formatCOP(item.price)}</div>
                     <div class="cart-item-actions">
                         <div class="quantity-controls">
                             <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
@@ -255,7 +257,7 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
     // Mapping keys to match Sheet headers: Fecha, Cliente, Teléfono, Dirección, Total, Detalles del Pedido
     let orderDetails = "";
     cart.forEach(item => {
-        orderDetails += `${item.quantity}x ${item.name} ($${(item.price * item.quantity).toLocaleString()})\n`;
+        orderDetails += `${item.quantity}x ${item.name} ($${formatCOP(item.price * item.quantity)})\n`;
     });
 
     const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -273,7 +275,7 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
     formData.append("Cliente", name);
     formData.append("Telefono", phone);
     formData.append("Direccion", address);
-    formData.append("Total", `$${totalPrice.toLocaleString()}`);
+    formData.append("Total", `$${formatCOP(totalPrice)}`);
     formData.append("Detalles", orderDetails);
 
     fetch(SCRIPT_URL, {
@@ -353,8 +355,8 @@ function generateOrderPDF(orderData) {
         const productData = [
             item.name,
             item.quantity,
-            `$${item.price.toLocaleString()}`,
-            `$${(item.price * item.quantity).toLocaleString()}`
+            `$${formatCOP(item.price)}`,
+            `$${formatCOP(item.price * item.quantity)}`
         ];
         tableRows.push(productData);
     });
@@ -371,7 +373,7 @@ function generateOrderPDF(orderData) {
     // Total
     const finalY = doc.lastAutoTable.finalY || 75;
     doc.setFontSize(14);
-    doc.text(`Total: $${orderData.totalPrice.toLocaleString()}`, 196, finalY + 15, { align: "right" });
+    doc.text(`Total: $${formatCOP(orderData.totalPrice)}`, 196, finalY + 15, { align: "right" });
 
     // Footer
     doc.setFontSize(10);

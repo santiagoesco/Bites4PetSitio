@@ -67,6 +67,7 @@ const products = [
 ];
 
 const formatCOP = (value) => new Intl.NumberFormat('es-CO').format(value);
+const WHATSAPP_PHONE = '573006674990';
 
 // State
 let cart = [];
@@ -81,6 +82,7 @@ const cartItemsContainer = document.getElementById('cart-items');
 const cartCountElement = document.getElementById('cart-count');
 const cartTotalCountElement = document.getElementById('cart-total-count');
 const cartTotalPriceElement = document.getElementById('cart-total-price');
+const checkoutWhatsappBtn = document.getElementById('checkout-whatsapp-btn');
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
@@ -193,179 +195,63 @@ cartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
 
-// Checkout mocked
-document.getElementById('checkout-btn').addEventListener('click', () => {
+function getValidatedCheckoutData() {
     if (cart.length === 0) {
         alert('Agrega productos antes de finalizar.');
-        return;
+        return null;
     }
 
-    const name = document.getElementById('client-name').value;
-    const phone = document.getElementById('client-phone').value;
-    const address = document.getElementById('client-address').value;
+    const name = document.getElementById('client-name').value.trim();
+    const phone = document.getElementById('client-phone').value.trim();
+    const address = document.getElementById('client-address').value.trim();
 
     if (!name || !phone || !address) {
         alert('Por favor completa todos los datos de envío.');
-        return;
+        return null;
     }
 
     const dataAuth = document.getElementById('data-auth');
     if (!dataAuth.checked) {
         alert('Por favor, autoriza el tratamiento de tus datos personales para continuar.');
-        return;
+        return null;
     }
-
-    // Google Sheets Submission
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4Kx04ibw6Jq33CgC94du4JFSJH7TRSugH2OL_5c7UePMRwh9toyqK8Dy1AbgAUQgEZA/exec";
-
-    if (SCRIPT_URL === "TU_URL_AQUI") {
-        alert("⚠️ FALTA CONFIGURACIÓN: Debes configurar la URL del script de Google en el archivo script.js.");
-        console.error("Falta URL del Script de Google Apps. Ver instrucciones en SETUP_DRIVE_ORDERS.md");
-        return;
-    }
-
-    const submitBtn = document.getElementById('checkout-btn');
-    const originalText = submitBtn.innerText;
-    submitBtn.innerText = "Enviando pedido...";
-    submitBtn.disabled = true;
-
-    // Prepare data for Google Sheets
-    // Mapping keys to match Sheet headers: Fecha, Cliente, Teléfono, Dirección, Total, Detalles del Pedido
-    let orderDetails = "";
-    cart.forEach(item => {
-        orderDetails += `${item.quantity}x ${item.name} ($${formatCOP(item.price * item.quantity)})\n`;
-    });
 
     const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Capture order data for PDF before potential cart clearing
-    const orderDataForPDF = {
+    return {
         name,
         phone,
         address,
-        cart: JSON.parse(JSON.stringify(cart)), // Deep clone to be safe
-        totalPrice
+        totalPrice,
+        cart: JSON.parse(JSON.stringify(cart))
     };
+}
 
-    const formData = new FormData();
-    formData.append("Cliente", name);
-    formData.append("Telefono", phone);
-    formData.append("Direccion", address);
-    formData.append("Total", `$${formatCOP(totalPrice)}`);
-    formData.append("Detalles", orderDetails);
+function buildWhatsAppOrderMessage(orderData) {
+    const itemsText = orderData.cart
+        .map(item => `• ${item.quantity}x ${item.name} - $${formatCOP(item.price * item.quantity)}`)
+        .join('\n');
 
-    fetch(SCRIPT_URL, {
-        method: "POST",
-        body: formData
-    })
-        .then(response => {
-            if (response.ok) {
-                alert("✅ ¡Pedido recibido! Nos pondremos en contacto contigo pronto.");
-                cart = [];
-                updateCartUI();
-                closeCart();
-                // Clear form
-                document.getElementById('client-name').value = "";
-                document.getElementById('client-phone').value = "";
-                document.getElementById('client-address').value = "";
-                document.getElementById('data-auth').checked = false;
-            } else {
-                throw new Error("Error en la respuesta del servidor");
-            }
-        })
-        .catch(error => {
-            console.error("Error!", error.message);
-            alert("Hubo un error al enviar el pedido. Por favor intenta de nuevo o contáctanos por WhatsApp.");
-        })
-        .finally(() => {
-            submitBtn.innerText = originalText;
-            submitBtn.disabled = false;
+    return `Hola Bites 4 Pet, quiero confirmar este pedido:\n\n` +
+        `Cliente: ${orderData.name}\n` +
+        `Celular: ${orderData.phone}\n` +
+        `Dirección: ${orderData.address}\n\n` +
+        `Pedido:\n${itemsText}\n\n` +
+        `Total: $${formatCOP(orderData.totalPrice)}`;
+}
 
-            // Generate PDF
-            try {
-                generateOrderPDF(orderDataForPDF);
-                console.log("PDF generated successfully.");
-            } catch (pdfError) {
-                console.error("Error generating PDF:", pdfError);
-                alert("El pedido se envió, pero hubo un error generando el PDF.");
-            }
-        });
-});
+function openWhatsAppWithOrder(orderData) {
+    const message = buildWhatsAppOrderMessage(orderData);
+    const whatsappURL = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, '_blank');
+}
 
-// PDF Generation
-function generateOrderPDF(orderData) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Logo
-    if (typeof logoBase64 !== 'undefined') {
-        doc.addImage(logoBase64, 'JPEG', 10, 10, 50, 20);
-    } else {
-        const logoImg = document.querySelector('.logo-img');
-        if (logoImg) {
-            doc.addImage(logoImg, 'JPEG', 10, 10, 50, 20);
-        }
-    }
-
-    // Header
-    doc.setFontSize(22);
-    doc.setTextColor(244, 122, 32); // Orange #F47A20
-    doc.text("Bites 4 Pet", 105, 25, { align: "center" });
-
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Resumen de Pedido", 105, 30, { align: "center" });
-
-    // Customer Details
-    doc.setFontSize(10);
-    doc.text(`Fecha: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 14, 45);
-    doc.text(`Cliente: ${orderData.name}`, 14, 52);
-    doc.text(`Teléfono: ${orderData.phone}`, 14, 59);
-    doc.text(`Dirección: ${orderData.address}`, 14, 66);
-
-    // Order Table
-    const tableColumn = ["Producto", "Cant.", "Precio Unit.", "Subtotal"];
-    const tableRows = [];
-
-    orderData.cart.forEach(item => {
-        const productData = [
-            item.name,
-            item.quantity,
-            `$${formatCOP(item.price)}`,
-            `$${formatCOP(item.price * item.quantity)}`
-        ];
-        tableRows.push(productData);
+if (checkoutWhatsappBtn) {
+    checkoutWhatsappBtn.addEventListener('click', () => {
+        const orderData = getValidatedCheckoutData();
+        if (!orderData) return;
+        openWhatsAppWithOrder(orderData);
     });
-
-    doc.autoTable({
-        head: [tableColumn],
-        body: tableRows,
-        startY: 75,
-        theme: 'striped',
-        headStyles: { fillColor: [244, 122, 32] }, // Orange #F47A20
-        margin: { top: 75 },
-    });
-
-    // Total
-    const finalY = doc.lastAutoTable.finalY || 75;
-    doc.setFontSize(14);
-    doc.text(`Total: $${formatCOP(orderData.totalPrice)}`, 196, finalY + 15, { align: "right" });
-
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Gracias por tu compra. ¡Tu peludo te lo agradecerá!", 105, finalY + 30, { align: "center" });
-    doc.text("Contacto: +57 300 667 4990", 105, finalY + 36, { align: "center" });
-
-    // Disclaimer
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    const disclaimer = "Ten presente que en caso de que tu ubicación supere el perímetro de cobertura, el domicilio tendrá un recargo. Uno de nuestros colaboradores se comunicará contigo para confirmar la información del pedido realizado.";
-    const splitDisclaimer = doc.splitTextToSize(disclaimer, 180);
-    doc.text(splitDisclaimer, 105, finalY + 45, { align: "center" });
-
-    // Save PDF
-    doc.save(`Pedido_${orderData.name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
 }
 
 // Scroll Animations

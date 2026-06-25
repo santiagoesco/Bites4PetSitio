@@ -424,21 +424,26 @@ h4 {
 }
 
 .product-image {
-    height: 250px;
-    background-color: #f4f4f4;
+    height: 280px;
+    background: linear-gradient(180deg, #f8f8f8 0%, #efefef 100%);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
 }
 
 .product-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     transition: transform 0.5s ease;
 }
 
 .product-card:hover .product-image img {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .product-info {

@@ -5,7 +5,7 @@ const products = [
         name: "Barriga Llena Pollo 500g",
         price: 8000,
         category: "Alimento Natural",
-        image: "MIX DESHIDRATADOS (1).png",
+        image: "barriga llena pollo.jpeg",
         description: "Alimento natural de 500 g, elaborado con proteína de pollo para una nutrición completa y sabrosa."
     },
     {
@@ -13,13 +13,13 @@ const products = [
         name: "Barriga Llena Res 500g",
         price: 8000,
         category: "Alimento Natural",
-        image: "MIX DESHIDRATADOS (2).png",
+        image: "barriga llena Res 500.jpeg",
         description: "Alimento natural de 500 g, elaborado con proteína de res para aportar energía y bienestar diario."
     },
     {
         id: 1,
         name: "ROKETAS",
-        price: 10000,
+        price: 12000,
         category: "Galletas Artesanales",
         image: "roketas.png",
         description: "Galletas artesanales naturales con hígado, pollo y avena. Premio saludable que apoya la digestión"
@@ -33,27 +33,19 @@ const products = [
         description: "Snack natural de res, pollo y cerdo, rico en proteína y energía para tu perro."
     },
     {
-        id: 3,
-        name: "Callo de Res Deshidratado",
-        price: 10000,
-        category: "Proteína",
-        image: "Callo de Res Deshidratado.png", // Placeholder
-        description: "Snack natural bajo en grasa, rico en enzimas que favorecen una digestión saludable."
-    },
-    {
         id: 4,
-        name: "Oreja Deshidratada",
-        price: 10000,
+        name: "Orejas Deshidratadas",
+        price: 15000,
         category: "Mix",
-        image: "Oreja Deshidratada.png", // Placeholder
+        image: "orejas cambio.jpeg",
         description: "Snack natural y crujiente que ayuda a limpiar los dientes y aporta colágeno para articulaciones fuertes."
     },
     {
         id: 5,
-        name: "Traquea Deshidratada",
-        price: 10000,
+        name: "Tráquea Deshidratada",
+        price: 15000,
         category: "Deshidratados",
-        image: "tra.png",
+        image: "traquea para cambio.jpeg",
         description: "Snack natural rico en colágeno, ideal para apoyar articulaciones y encías mientras disfrutan masticando."
     },
     {
@@ -65,28 +57,12 @@ const products = [
         description: "Snack crujiente rico en glucosamina, ideal para apoyar la salud articular y dental."
     },
     {
-        id: 7,
-        name: "Piel de Cerdo Deshidratada",
-        price: 10000,
-        category: "Deshidratados",
-        image: "pcd.png",
-        description: "Snack natural rico en colágeno que apoya articulaciones y encías."
-    },
-    {
         id: 8,
-        name: "Hueso Res y Cerdo Deshidratados",
-        price: 10000,
+        name: "Huesos de Res",
+        price: 15000,
         category: "Huesos Recreativos",
-        image: "hrcd.png",
+        image: "huesos para cambio.jpeg",
         description: "Snack natural ideal para masticación intensa, ayuda a limpiar los dientes y aporta calcio para huesos fuertes."
-    },
-    {
-        id: 9,
-        name: "Chorirricos",
-        price: 10000,
-        category: "Snacks",
-        image: "Cho.png",
-        description: "Snack 100% carne de res, alto en proteína y perfecto como premio de entrenamiento."
     }
 ];
 
